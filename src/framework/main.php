@@ -7,6 +7,7 @@ require_once(CONFIG_FILE);
 require_once(FRAME_PATH.'/db.func.php');
 require_once(FRAME_PATH.'/mail.func.php');
 require_once(FRAME_PATH.'/path.class.php');
+require_once(FRAME_PATH.'/model.class.php');
 require_once(FRAME_PATH.'/request.func.php');
 require_once(FRAME_PATH.'/response.func.php');
 require_once(FRAME_PATH.'/controller.class.php');

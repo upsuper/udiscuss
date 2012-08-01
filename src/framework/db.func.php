@@ -32,7 +32,7 @@ function query($db, $sql)
 function query_one($db, $sql)
 {
     $result = call_user_func_array('query', func_get_args());
-    if (! $result instanceof PDOStatement)
+    if (!($result instanceof PDOStatement))
         return $result;
     $row = $result->fetch();
     return $row;
