@@ -25,9 +25,11 @@ abstract class Model
     public function __set($name, $value)
     {
         $set_name = '_set_'.$name;
-        if (method_exists($this, $get_name))
+        if (method_exists($this, $set_name)) {
             if (!call_user_func(array($this, $set_name), $value))
                 throw new Exception("Set property $name failed");
+            return;
+        }
 
         $get_name = '_get_'.$name;
         if (method_exists($this, $get_name))

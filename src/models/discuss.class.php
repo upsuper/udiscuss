@@ -35,6 +35,12 @@ class Discuss extends Model
         $this->put_info();
     }
 
+    public function __sleep()
+    {
+        $this->put_info();
+        return array('discuss_id');
+    }
+
     /**
      * Save to database
      *
@@ -166,7 +172,7 @@ class Discuss extends Model
      * @param string $title
      * @param int $permission Discuss::PERMISSION_*
      * @param string $content
-     * @return bool
+     * @return Discuss|false
      */
     public static function create_discuss($initiater, $title,
         $permission, $content)
@@ -188,7 +194,7 @@ class Discuss extends Model
             goto failed;
 
         $db->commit();
-        return true;
+        return new Discuss($discuss_id);
 
     failed:
         $db->rollBack();
@@ -310,7 +316,9 @@ class Discuss extends Model
             self::PERMISSION_READ => 'read',
             self::PERMISSION_REPLY => 'reply',
             self::PERMISSION_INVITE => 'invite');
-        static $perm_fromdb = array_flip($perm_todb);
+        static $perm_fromdb = NULL;
+        if (!$perm_fromdb)
+            $perm_fromdb = array_flip($perm_todb);
 
         return $from_db ? $perm_fromdb[$permission] : $perm_todb[$permission];
     }

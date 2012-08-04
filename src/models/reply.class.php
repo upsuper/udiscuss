@@ -24,6 +24,11 @@ class Reply extends Model
         $this->user_id = $user_id;
     }
 
+    public function __sleep()
+    {
+        return array('discuss_id', 'user_id');
+    }
+
     /**
      * Fill info with given data
      * If no data given, query the database
@@ -113,7 +118,7 @@ class Reply extends Model
      * @param int $discuss_id
      * @param int $user_id
      * @param string $content
-     * @return bool
+     * @return Reply|bool
      */
     public static function create_reply($discuss_id, $user_id, $content)
     {
@@ -141,7 +146,7 @@ class Reply extends Model
 
         if (!$in_transaction)
             $db->commit();
-        return true;
+        return new Reply($discuss_id, $user_id);
 
     failed:
         if (!$in_transaction)
@@ -192,7 +197,9 @@ class Reply extends Model
      */
     public function update_content($content)
     {
-        static $five_minutes = new DateInterval('PT5M');
+        static $five_minutes = NULL;
+        if (!$five_minutes)
+            $five_minutes = new DateInterval('PT5M');
         $last_update = $this->_get_last_update();
         $now = new Datetime();
 

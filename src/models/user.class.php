@@ -28,6 +28,12 @@ class User extends Model
         $this->put_info();
     }
 
+    public function __sleep()
+    {
+        $this->put_info();
+        return array('user_id');
+    }
+
     /**
      * Save to database
      *
@@ -124,7 +130,7 @@ class User extends Model
      *
      * @param string $username
      * @param string $email
-     * @return bool
+     * @return User|false
      */
     public static function create_user($username, $email)
     {
@@ -132,7 +138,10 @@ class User extends Model
         $result = query($db,
             'INSERT INTO users (username, email) VALUES (%s, %s)',
             $username, $email);
-        return !!$result;
+        if (!$result)
+            return false;
+        $user_id = intval($db->lastInsertId('users_user_id_seq'));
+        return new User($user_id);
     }
 
     /**

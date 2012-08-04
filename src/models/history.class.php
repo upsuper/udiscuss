@@ -21,6 +21,11 @@ class History extends Model
         $this->history_id = $history_id;
     }
 
+    public function __sleep()
+    {
+        return array('history_id');
+    }
+
     /**
      * Fill info with given data
      * If no data given, query the database
@@ -105,8 +110,8 @@ class History extends Model
             $content, $discuss_id, $user_id);
         if (!$result)
             return false;
-        $history_id = $db->lastInsertId('history_history_id_seq');
-        return new History(intval($history_id));
+        $history_id = intval($db->lastInsertId('history_history_id_seq'));
+        return new History($history_id);
     }
 
     /**
