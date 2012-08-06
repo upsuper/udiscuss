@@ -14,8 +14,10 @@ class Controller
             $args = array('index');
         
         $ref = new ReflectionClass($this);
-        $classname = $ref->getName();
         $filename = $ref->getFileName();
+        if (basename($filename) != '__init.php')
+            return not_found();
+        $classname = $ref->getName();
         $dir = dirname($filename);
         $nextclass = substr($classname, 0, -11).
             ucfirst(strtolower($name)).'_Controller';
