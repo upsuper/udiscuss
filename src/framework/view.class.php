@@ -23,16 +23,16 @@ abstract class View
         return isset($this->data[$name]);
     }
 
-    public function render()
+    public function _render()
     {
         ob_start();
-        $this->page();
+        $this->_page();
         $content = ob_get_contents();
         ob_end_clean();
         return $content;
     }
 
-    public abstract function page();
+    public abstract function _page();
 }
 
 ?>

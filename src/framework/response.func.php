@@ -99,29 +99,19 @@ function get_token()
  */
 function template($tpl, $data = array())
 {
-    function view_autoload($classname)
-    {
-        if (substr($classname, -5) != '_View')
-            return;
-        $filename = substr($classname, 0, -5);
-        $filename = preg_replace('/[A-Z][0-9a-z]*/', '/\0', $filename);
-        $filename = VIEW_PATH.strtolower($filename);
-        if (file_exists($filename.'/__base.php')) {
-            include($filename.'/__base.php');
-        } elseif (file_exists($filename.'.php')) {
-            include($filename.'.php');
+    
+    spl_autoload_register(function ($classname) {
+        if (start_with($classname, Template::VIEW_PREFIX)) {
+            include(CACHE_PATH.Template::VIEW_PATH.'/'.
+                substr($classname, strlen(Template::VIEW_PREFIX)).'.php');
         }
-    }
-    spl_autoload_register('view_autoload');
+    });
 
     require_once(FRAME_PATH.'/view.class.php');
-    $tplname = $tpl.'_View';
-    if (! class_exists($tplname)) {
-        echo "View \"$tpl\" not found.";
-        return;
-    }
-    $inst = new $tplname($data);
-    echo $inst->render();
+    require_once(FRAME_PATH.'/template.class.php');
+    $view = Template::compile($tpl);
+    $inst = new $view($data);
+    echo $inst->_render();
 }
 
 ?>
