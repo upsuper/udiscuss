@@ -19,7 +19,7 @@ function status_header($header)
  */
 function abs_url($path)
 {
-    return SCRIPT_URI.$path;
+    return ROOT_URI.$path;
 }
 
 /**

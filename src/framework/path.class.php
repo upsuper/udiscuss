@@ -67,7 +67,7 @@ class PathClass
         $ret[] = '';
         $ret = implode('/', $ret);
         if ($include_script)
-            $ret = SCRIPT_URI.$ret;
+            $ret = ROOT_URI.$ret;
         return $ret;
     }
 }

@@ -18,6 +18,8 @@ function safe_dirname($path)
 define('SCRIPT_URI', $_SERVER['SCRIPT_NAME']);
 define('BASE_URI', safe_dirname(SCRIPT_URI));
 define('STATIC_URI', BASE_URI.'/static');
+// XXX: If no URL Rewrite enabled, set to SCRIPT_URI
+define('ROOT_URI', BASE_URI);
 
 define('CONFIG_FILE', BASE_PATH.'/config.php');
 
