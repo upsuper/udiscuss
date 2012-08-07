@@ -10,16 +10,16 @@
  */
 function is_valid_email($email)
 {
-    // 是否存在@
+    // whether exists @
     $at_index = strrpos($email, '@');
     if ($at_index === false)
         return false;
-    // 分离信息
+    // seperate information
     $local = substr($email, 0, $at_index);
     $domain = substr($email, $at_index + 1);
     $local_len = strlen($local);
     $domain_len = strlen($domain);
-    // 检查有效性
+    // check if valid
     if ($local_len < 1 || $local_len > 64)
         return false;
     if ($domain_len < 1 || $domain_len > 255)
@@ -30,13 +30,14 @@ function is_valid_email($email)
         return false;
     if (strpos($domain, '..') !== false)
         return false;
-    if (! preg_match('/^[A-Za-z0-9.-]+[A-Za-z0-9]$/', $domain))
+    if (!preg_match('/^[A-Za-z0-9.-]+[A-Za-z0-9]$/', $domain))
         return false;
-    if (! preg_match('/^"[^"]+"$/', $local)) {
-        if (! preg_match('/^[A-Za-z0-9!#$%&\'*+\\/=?^_`{|}~.-]+$/', substr($local, 1, -1)))
+    if (!preg_match('/^"[^"]+"$/', $local)) {
+        if (!preg_match('/^[A-Za-z0-9!#$%&\'*+\\/=?^_`{|}~.-]+$/',
+                substr($local, 1, -1)))
             return false;
     }
-    if (! (checkdnsrr($domain, 'MX') || checkdnsrr($domain, 'A')))
+    if (!(checkdnsrr($domain, 'MX') || checkdnsrr($domain, 'A')))
         return false;
     return true;
 }

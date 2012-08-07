@@ -8,9 +8,9 @@ class Controller
 
     public function __call($name, $args)
     {
-        if (! $name)
-            return $this->index($args);
-        if (! $args)
+        if (!$name)
+            return call_user_func_array(array($this, 'index'), $args);
+        if (!$args)
             $args = array('index');
         
         $ref = new ReflectionClass($this);
@@ -32,7 +32,7 @@ class Controller
                 break;
             }
         }
-        if (! class_exists($nextclass, false))
+        if (!class_exists($nextclass, false))
             return not_found();
 
         $inst = new $nextclass($args);

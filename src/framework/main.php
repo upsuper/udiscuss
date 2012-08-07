@@ -7,7 +7,6 @@ require_once(CONFIG_FILE);
 require_once(FRAME_PATH.'/db.func.php');
 require_once(FRAME_PATH.'/mail.func.php');
 require_once(FRAME_PATH.'/misc.func.php');
-require_once(FRAME_PATH.'/path.class.php');
 require_once(FRAME_PATH.'/model.class.php');
 require_once(FRAME_PATH.'/request.func.php');
 require_once(FRAME_PATH.'/response.func.php');
@@ -34,9 +33,16 @@ if (get_magic_quotes_gpc()) {
     $_COOKIE = t_stripslashes_deep($_COOKIE);
 }
 
+// check post token
+if (is_post()) {
+    $token = get_form($CONFIG['token_field']);
+    if ($token != get_token())
+        exit(forbidden());
+    unset($token);
+}
+
 // register model autoload
-function model_autoload($classname)
-{
+spl_autoload_register(function ($classname) {
     if (substr($classname, -11) == '_Controller')
         return;
     if (substr($classname, -5) == '_View')
@@ -50,8 +56,7 @@ function model_autoload($classname)
     $filename = str_replace('__', '/', $filename);
     $filename = MODEL_PATH.'/'.$filename.'.class.php';
     file_exists($filename) and include($filename);
-}
-spl_autoload_register('model_autoload');
+});
 
 // register controller autoload
 // TODO
@@ -62,27 +67,26 @@ mb_internal_encoding('UTF-8');
 date_default_timezone_set('Asia/Shanghai');
 
 // parse path
-if (! isset($_SERVER['PATH_INFO']) || ! $_SERVER['PATH_INFO'])
+if (!isset($_SERVER['PATH_INFO']) || !$_SERVER['PATH_INFO'])
     $_SERVER['PATH_INFO'] = '/';
 $path = explode('/', $_SERVER['PATH_INFO']);
 if (end($path) != '')
-    redirect(implode('/', $path).'/');
+    exit(redirect(implode('/', $path).'/'));
 $orig_len = count($path);
-function filter_path($var)
-{
-    return $var && $var != '.' && $var != '..';
-}
-$path = array_filter($path, 'filter_path');
+$path = array_filter($path, function ($slice) {
+    return $slice && $slice != '.' && $slice != '..';
+});
 while (end($path) == 'index')
     array_pop($path);
 if (count($path) != $orig_len - 2)
-    redirect('/'.implode('/', $path).'/');
+    exit(redirect('/'.implode('/', $path).'/'));
+unset($orig_len);
 
 // go into controller
 include(CTRL_PATH.'/__init.php');
 $inst = new _Controller;
-$first = array_shift($path);
-$resp = $inst->__call($first, $path);
+$first = $path ? array_shift($path) : '';
+$resp = call_user_func_array(array($inst, $first), $path);
 
 // return data
 // TODO maybe need to process before return
