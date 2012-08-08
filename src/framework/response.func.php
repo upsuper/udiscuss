@@ -114,4 +114,14 @@ function template($tpl, $data = array())
     echo $inst->_render();
 }
 
+/**
+ * Output JSON data
+ *
+ * @param mixed $data
+ */
+function json($data)
+{
+    echo json_encode($data);
+}
+
 ?>

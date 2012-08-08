@@ -8,4 +8,5 @@ $CONFIG = array(
         'username' => '',
         'password' => '',
     ),
+    'token_field' => '_token',
 );
