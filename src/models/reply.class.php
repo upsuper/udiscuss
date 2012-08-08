@@ -57,7 +57,7 @@ class Reply extends Model
      * Get replies
      *
      * @param string $condition
-     * @param int $limit
+     * @param int $limit If equal to 0, not limit set
      * @param int $offset
      * @return array of Reply instances
      */
@@ -65,13 +65,14 @@ class Reply extends Model
     {
         $limit = intval($limit);
         $offset = intval($offset);
+        $limits = ($limit > 0 ? "LIMIT $limit " : "").
+            ($offset > 0 ? "OFFSET $offset" : "");
 
         global $db;
         $query = query($db,
             "SELECT discuss_id, user_id, content, last_update
             FROM reply WHERE $condition
-            ORDER BY last_update DESC
-            LIMIT $limit OFFSET $offset");
+            ORDER BY last_update DESC $limits");
 
         $result = array();
         while (($row = $query->fetch()) !== false) {
@@ -86,7 +87,7 @@ class Reply extends Model
      * Get replies in one discuss
      *
      * @param int $discuss_id
-     * @param int $limit
+     * @param int $limit If equal to 0, not limit set
      * @param int $offset
      * @return array of Reply instances
      */
@@ -94,14 +95,14 @@ class Reply extends Model
         $limit = 10, $offset = 0)
     {
         $discuss_id = intval($discuss_id);
-        return $this->get_reply('discuss_id='.$discuss_id, $limit, $offset);
+        return self::get_reply('discuss_id='.$discuss_id, $limit, $offset);
     }
 
     /**
      * Get replies by one user
      *
      * @param int $user_id
-     * @param int $limit
+     * @param int $limit If equal to 0, no limit set
      * @param int $offset
      * @return array of Reply instances
      */
@@ -109,7 +110,7 @@ class Reply extends Model
         $limit = 10, $offset = 0)
     {
         $user_id = intval($user_id);
-        return $this->get_reply('user_id='.$user_id, $limit, $offset);
+        return self::get_reply('user_id='.$user_id, $limit, $offset);
     }
 
     /**

@@ -90,46 +90,28 @@ class Discuss extends Model
     }
 
     /**
-     * Get discussions as user
+     * Get discussions
      *
-     * If user_id = 0, return result for guest.
-     * If set participated, return only those user participated in.
-     *
-     * @param int $user_id
-     * @param bool $participated
-     * @param int $limit
+     * @param string $condition
+     * @param int $limit If equal to 0, no limit set
      * @param int $offset
      * @return array of Discuss instances
      */
-    public static function get_discuss($user_id = 0, $participated = false,
+    private static function get_discuss($condition,
         $limit = 10, $offset = 0)
     {
         global $db;
         
-        $user_id = intval($user_id);
         $limit = intval($limit);
         $offset = intval($offset);
+        $limits = ($limit > 0 ? "LIMIT $limit " : "").
+            ($offset > 0? "OFFSET $offset" : "");
         $condition = '';
-        if ($user_id > 0) {
-            if ($participated) {
-                $condition = "WHERE discuss_id IN (
-                    SELECT discuss_id FROM reply WHERE user_id=$user_id)";
-            } else {
-                $condition = "WHERE permission>='read' OR 
-                    initiater=$user_id OR
-                    discuss_id IN (
-                        SELECT discuss_id FROM user_permission
-                        WHERE user_id=$user_id AND permission>='read')";
-            }
-        } else {
-            $condition = 'WHERE permission>=\'read\'';
-        }
 
         $query = query($db, 
             "SELECT discuss_id, initiater, title, permission, last_update
-            FROM discuss $condition
-            ORDER BY last_update DESC
-            LIMIT $limit OFFSET $offset");
+            FROM discuss WHERE $condition
+            ORDER BY last_update DESC $limits");
 
         $result = array();
         while (($row = $query->fetch()) !== false) {
@@ -138,6 +120,48 @@ class Discuss extends Model
             $result[] = $inst;
         }
         return $result;
+    }
+
+    /**
+     * Get discussions as user
+     *
+     * If user_id = 0, return result for guest.
+     *
+     * @param int $user_id
+     * @param int $limit If equal to 0, no limit set
+     * @param int $offset
+     * @return array of Discuss instances
+     */
+    public static function get_discuss_as_user($user_id,
+        $limit = 10, $offset = 0)
+    {
+        if ($user_id > 0) {
+            $condition = "permission>='read' OR 
+                initiater=$user_id OR
+                discuss_id IN (
+                    SELECT discuss_id FROM user_permission
+                    WHERE user_id=$user_id AND permission>='read')";
+        } else {
+            $condition = 'permission>=\'read\'';
+        }
+        return self::get_discuss($condition, $limit, $offset);
+    }
+
+    /**
+     * Get discussions as user
+     *
+     * If user_id = 0, return result for guest.
+     *
+     * @param int $user_id
+     * @param int $limit If equal to 0, no limit set
+     * @param int $offset
+     * @return array of Discuss instances
+     */
+    public static function get_discuss_by_initiater($initiater,
+        $limit = 10, $offset = 0)
+    {
+        $initiater = intval($initiater);
+        return self::get_discuss("initiater=$initiater", $limit, $offset);
     }
 
     /**
@@ -324,6 +348,27 @@ class Discuss extends Model
     }
 
     /**
+     * Get permission for given user.
+     * If there are no specified permission for the user,
+     * it returns false.
+     *
+     * @param int $user_id
+     * @return int|false int for Discuss::PERMISSION_*
+     */
+    public function get_user_permission($user_id)
+    {
+        global $db;
+
+        $result = query_one($db,
+            'SELECT permission FROM user_permission
+            WHERE discuss_id=%s AND user_id=%s',
+            $this->discuss_id, $user_id);
+        if ($result === false)
+            return false;
+        return Discuss::convert_permission($result);
+    }
+
+    /**
      * Set permission for given user
      *
      * @param int $user_id
@@ -390,9 +435,10 @@ class Discuss extends Model
             FROM user_permission WHERE discuss_id=%s',
             $this->discuss_id);
         $result = array();
-        while (($row = $query->fetch()) !== false)
+        while (($row = $query->fetch()) !== false) {
             $result[intval($row->user_id)] =
                 self::convert_permission($row->permission);
+        }
         return $result;
     }
 }

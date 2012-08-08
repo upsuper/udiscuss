@@ -2,6 +2,11 @@
 
 class User extends Model
 {
+    const CREATE_EMAIL_INVALID = 1;
+    const CREATE_USERNAME_EXISTS = 2;
+    const CREATE_EMAIL_EXISTS = 3;
+    const CREATE_UNKNOWN = -1;
+
     private $user_id;
     private $username;
     private $email;
@@ -130,16 +135,25 @@ class User extends Model
      *
      * @param string $username
      * @param string $email
-     * @return User|false
+     * @return User|int If create failed, return User::CREATE_* for error
      */
     public static function create_user($username, $email)
     {
+        if (!is_valid_email($email))
+            return self::CREATE_EMAIL_INVALID;
+
         global $db;
         $result = query($db,
             'INSERT INTO users (username, email) VALUES (%s, %s)',
             $username, $email);
-        if (!$result)
-            return false;
+        if (!$result) {
+            $error = $db->errorInfo();
+            if (strpos($error, 'username') !== false)
+                return self::CREATE_USERNAME_EXISTS;
+            if (strpos($error, 'email') !== false)
+                return self::CREATE_EMAIL_EXISTS;
+            return self::CREATE_UNKNOWN;
+        }
         $user_id = intval($db->lastInsertId('users_user_id_seq'));
         return new User($user_id);
     }
@@ -174,8 +188,11 @@ class User extends Model
     public function _set_username($username)
     {
         $this->fill_info();
-        if ($this->username != $username)
+        if ($this->username != $username) {
+            if (!$username)
+                return false;
             $this->dirty = true;
+        }
         $this->username = username;
         return true;
     }
@@ -200,8 +217,11 @@ class User extends Model
     public function _set_email($email)
     {
         $this->fill_info();
-        if ($this->email != $email)
+        if ($this->email != $email) {
+            if (!is_valid_email($email))
+                return false;
             $this->dirty = true;
+        }
         $this->email = email;
         return true;
     }
@@ -254,27 +274,6 @@ class User extends Model
         $result = query($db, 
             'UPDATE users SET password=%s WHERE user_id=%s',
             $password, $this->user_id);
-    }
-
-    /**
-     * Get specified user permission for given discuss
-     * If there are no specified permission for the user,
-     * it returns false.
-     *
-     * @param int $discuss_id
-     * @return int|false int for Discuss::PERMISSION_*
-     */
-    public function get_user_permission($discuss_id)
-    {
-        global $db;
-
-        $result = query_one($db,
-            'SELECT permission FROM user_permission
-            WHERE discuss_id=%s AND user_id=%s',
-            $discuss_id, $this->user_id);
-        if ($result === false)
-            return false;
-        return Discuss::convert_permission($result);
     }
 }
 
