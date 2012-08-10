@@ -106,7 +106,6 @@ class Discuss extends Model
         $offset = intval($offset);
         $limits = ($limit > 0 ? "LIMIT $limit " : "").
             ($offset > 0? "OFFSET $offset" : "");
-        $condition = '';
 
         $query = query($db, 
             "SELECT discuss_id, initiater, title, permission, last_update

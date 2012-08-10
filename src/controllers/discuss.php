@@ -191,7 +191,7 @@ class Discuss_Controller extends Controller
         $reply = new Reply($id, $user->id);
         try {
             $content = $reply->content;
-        } catch ($e) {
+        } catch (Exception $e) {
             $content = null;
         }
 

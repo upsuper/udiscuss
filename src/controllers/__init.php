@@ -107,7 +107,7 @@ class _Controller extends Controller
         try {
             $user->username = get_form('username');
             $user->email = get_form('email');
-        } catch ($e) {
+        } catch (Exception $e) {
             flash('Invalid username or email.', 'fail');
             return redirect();
         }
