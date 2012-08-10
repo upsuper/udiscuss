@@ -79,6 +79,51 @@ class Template
     }
 
     /**
+     * Translate filter style call
+     *
+     * a|b => b(a)
+     * a|b:c => b(a, c)
+     *
+     * @param string $code
+     * @return string
+     */
+    private static function translate_filter($code)
+    {
+        $orig_code = $code.'|';
+        $last_pos = 0;
+        $len = strlen($orig_code);
+        $in_quote = false;
+        for ($i = 0; $i < $len; ++$i) {
+            if ($in_quote) {
+                if ($orig_code[$i] == '\\')
+                    ++$i;
+                elseif ($orig_code[$i] == $in_quote)
+                    $in_quote = false;
+                continue;
+            }
+            switch ($orig_code[$i]) {
+            case '"':
+            case "'":
+                $in_quote = $orig_code[$i];
+                break;
+            case '|':
+                $l = $i - $last_pos;
+                if ($last_pos == 0) {
+                    $code = trim(substr($orig_code, $last_pos, $l));
+                } else {
+                    $c = substr($orig_code, $last_pos, $l);
+                    $c = explode(':', $c, 2);
+                    $p = isset($c[1]) ? ', '.trim($c[1]) : '';
+                    $code = trim($c[0]).'('.$code.$p.')';
+                }
+                $last_pos = $i + 1;
+                break;
+            }
+        }
+        return $code;
+    }
+
+    /**
      * Compile template
      *
      * @param string $tpl_file Template file path relative to TPL_PATH
@@ -93,15 +138,6 @@ class Template
         $dest = CACHE_PATH.self::VIEW_PATH.'/'.
             substr($view_name, strlen(self::VIEW_PREFIX)).'.php';
 
-        // check last modified time
-        if (file_exists($dest))
-            $dest_stat = stat($dest);
-        $file_stat = stat($file);
-        if (isset($dest_stat) && $dest_stat['mtime'] >= $file_stat['mtime']) {
-            self::$compiled[$tpl_file] = $view_name;
-            return $view_name;
-        }
-
         // initial compiling
         static $pat_stat = null, $pat_echo = null;
         if (!$pat_stat || !$pat_echo) {
@@ -115,7 +151,6 @@ class Template
         $tpl = file_get_contents($file);
         $length = strlen($tpl);
         $compiled = array();
-        $blocks = array();
         self::$compiled[$tpl_file] = $view_name;
 
         // check extends
@@ -139,6 +174,15 @@ class Template
             }
         }
 
+        // check last modified time
+        if (file_exists($dest))
+            $dest_stat = stat($dest);
+        $file_stat = stat($file);
+        if (isset($dest_stat) && $dest_stat['mtime'] >= $file_stat['mtime']) {
+            self::$compiled[$tpl_file] = $view_name;
+            return $view_name;
+        }
+
         // generate specific token
         $token = pack('LL', mt_rand(), mt_rand());
         while (strpos($tpl, $token) !== false || start_with($token, '<?php '))
@@ -148,7 +192,9 @@ class Template
         $p_stat = '/'.$pat_stat.'/';
         $p_echo = '/'.$pat_echo.'/';
         $stack = array('');
-        $cur_block = '';
+        $blocks = array('' => array());
+        $cur_block = &$blocks[''];
+        $trim_next = false;
         while (true) {
             $next_stat = preg_match($p_stat, $tpl, $m_stat,
                 PREG_OFFSET_CAPTURE, $pos);
@@ -156,24 +202,37 @@ class Template
                 PREG_OFFSET_CAPTURE, $pos);
             $pos_stat = $next_stat ? $m_stat[0][1] : $length;
             $pos_echo = $next_echo ? $m_echo[0][1] : $length;
-            if ($pos_stat == $length && $pos_echo == $length) {
-                $blocks[$cur_block][] = substr($tpl, $pos);
-                $pos = $length;
-                break;
-            }
 
             $next_pos = min($pos_stat, $pos_echo);
-            $blocks[$cur_block][] = substr($tpl, $pos, $next_pos - $pos);
+            $code = substr($tpl, $pos, $next_pos - $pos);
+            if ($trim_next) {
+                $code = ltrim($code);
+                $trim_next = false;
+            } elseif (isset($code[0]) && $code[0] == "\n") {
+                $code = "\n".$code;
+            }
+            $cur_block[] = $code;
             $pos = $next_pos;
+            if ($pos == $length)
+                break;
 
             if ($next_pos == $pos_stat) {
-                $s = trim($m_stat[1][0]);
+                $s = $m_stat[1][0];
+                if ($s[0] == '-') {
+                    $cur_block[] = rtrim(array_pop($cur_block));
+                    $s = substr($s, 1);
+                }
+                if ($s[strlen($s) - 1] == '-') {
+                    $trim_next = true;
+                    $s = substr($s, 0, -1);
+                }
+                $s = trim($s);
                 $pos += strlen($m_stat[0][0]);
                 if (preg_match('/^block\s+([a-z][a-z0-9_]+)$/', $s, $match)) {
                     $blockname = $match[1];
                     $stack[] = $blockname;
                     $blocks[$blockname] = array();
-                    $cur_block = $blockname;
+                    $cur_block = &$blocks[$blockname];
                 } elseif ($s == 'endblock') {
                     $blockname = array_pop($stack);
                     $code = "\n\tfunction $blockname()\n\t{\n?".">".
@@ -182,11 +241,11 @@ class Template
                     $compiled[] = $code;
                     unset($blocks[$blockname]);
 
-                    $cur_block = end($stack);
+                    $cur_block = &$blocks[end($stack)];
                     $code = "<?php \$this->$blockname(); ?".">";
-                    if ($cur_block === '')
+                    if (end($stack) === '')
                         $code = $token.$code;
-                    $blocks[$cur_block][] = $code;
+                    $cur_block[] = $code;
                 } elseif ($s == 'raw') {
                     $endraw = '/'.preg_quote(self::STATEMENT_BEGIN, '/').
                         '\s*endraw\s*'.
@@ -195,29 +254,33 @@ class Template
                             PREG_OFFSET_CAPTURE, $pos))
                         throw new Exception('Corresponding endraw not found');
                     $next_pos = $match[0][1];
-                    $blocks[$cur_block][] =
-                        substr($tpl, $pos, $next_pos - $pos);
+                    $cur_block[] = substr($tpl, $pos, $next_pos - $pos);
                     $pos = $next_pos + strlen($match[0][0]);
+                } elseif (preg_match('/^include\s+(\'|")(.+)\1(\s+.*)?$/',
+                        $s, $match)) {
+                    $file = $match[2];
+                    $data = trim($match[3]);
+                    // TODO
                 } else {
                     $controls = '/^('.
                         'if|while|else(if)?|for(each)?|switch|case)\b/i';
                     if (substr($s, -1) != ':' && preg_match($controls, $s))
                         $s .= ':';
-                    $blocks[$cur_block][] = '<?php '.
-                        self::translate_vars($s).' ?'.'>';
+                    $cur_block[] = "<?php ".
+                        self::translate_vars($s)." ?".">";
                 }
             } else {
                 $s = trim($m_echo[1][0]);
                 $pos += strlen($m_echo[0][0]);
-                $blocks[$cur_block][] = '<?php echo '.
-                    self::translate_vars($s).' ?'.'>';
+                $code = self::translate_filter(self::translate_vars($s));
+                $cur_block[] = "<?php echo ".$code." ?".">";
             }
         }
 
         // check if root available
         if (count($stack) > 1)
             throw new Exception('Block "'.end($stack).'" not end');
-        if (count($stack) < 1 || $cur_block !== '')
+        if (count($stack) < 1 || end($stack) !== '')
             throw new Exception('Too many "endblock"');
         $has_root = false;
         $root = array_map(function ($v) use ($token) {
@@ -239,7 +302,7 @@ class Template
         $final = "<?php\n\n".
             "class $view_name extends $baseclass\n{".
             implode($compiled).
-            "}\n?".'>';
+            "}\n?".">";
         file_put_contents($dest, $final);
         return $view_name;
     }

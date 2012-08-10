@@ -2,10 +2,13 @@
 
 abstract class View
 {
+    protected $CONFIG;
     private $data = array();
 
     public function __construct($data)
     {
+        global $CONFIG;
+        $this->CONFIG = $CONFIG;
         $this->data = $data;
     }
 

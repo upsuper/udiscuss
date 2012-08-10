@@ -9,4 +9,5 @@ $CONFIG = array(
         'password' => '',
     ),
     'token_field' => '_token',
+    'title' => 'udiscuss',
 );
