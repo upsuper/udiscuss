@@ -112,7 +112,13 @@ class Template
                     $code = trim(substr($orig_code, $last_pos, $l));
                 } else {
                     $c = substr($orig_code, $last_pos, $l);
-                    $c = explode(':', $c, 2);
+                    switch ($c) {
+                    case 'E':
+                        $c = array('htmlspecialchars');
+                        break;
+                    default:
+                        $c = explode(':', $c, 2);
+                    }
                     $p = isset($c[1]) ? ', '.trim($c[1]) : '';
                     $code = trim($c[0]).'('.$code.$p.')';
                 }
@@ -242,7 +248,7 @@ class Template
                     unset($blocks[$blockname]);
 
                     $cur_block = &$blocks[end($stack)];
-                    $code = "<?php \$this->$blockname(); ?".">";
+                    $code = "<?php \$this->$blockname() ?".">";
                     if (end($stack) === '')
                         $code = $token.$code;
                     $cur_block[] = $code;

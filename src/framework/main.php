@@ -33,14 +33,6 @@ if (get_magic_quotes_gpc()) {
     $_COOKIE = t_stripslashes_deep($_COOKIE);
 }
 
-// check post token
-if (is_post()) {
-    $token = get_form($CONFIG['token_field']);
-    if ($token != get_token())
-        exit(forbidden());
-    unset($token);
-}
-
 // register model autoload
 spl_autoload_register(function ($classname) {
     if (substr($classname, -11) == '_Controller')
@@ -65,6 +57,14 @@ spl_autoload_register(function ($classname) {
 session_start();
 mb_internal_encoding('UTF-8');
 date_default_timezone_set('Asia/Shanghai');
+
+// check post token
+if (is_post()) {
+    $token = get_form($CONFIG['token_field']);
+    if ($token != get_token())
+        exit(forbidden());
+    unset($token);
+}
 
 // parse path
 if (!isset($_SERVER['PATH_INFO']) || !$_SERVER['PATH_INFO'])
