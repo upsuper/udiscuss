@@ -276,6 +276,7 @@ class User extends Model
         $result = query($db, 
             'UPDATE users SET password=%s WHERE user_id=%s',
             $password, $this->user_id);
+        return !!$result;
     }
 }
 
