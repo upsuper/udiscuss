@@ -43,6 +43,8 @@ class Template
         $vars = explode('.', $var);
         if ($vars[0] == '$') {
             array_shift($vars);
+            if (!$vars)
+                return '$this';
             $vars[0] = '$this->'.$vars[0];
         }
         $first = array_shift($vars);
@@ -63,7 +65,7 @@ class Template
         return preg_replace_callback(
             '/\'(\\\\.|[^\\\\])+\'|'.
             '"(\\\\.|[^\\\\])+"|'.
-            '\$[A-Za-z0-9_\.]+/',
+            '\$[A-Za-z0-9_\.]*/',
             function ($match) {
                 $match = $match[0];
                 switch ($match[0]) {
@@ -234,13 +236,19 @@ class Template
                 }
                 $s = trim($s);
                 $pos += strlen($m_stat[0][0]);
-                if (preg_match('/^block\s+([a-z][a-z0-9_]+)$/', $s, $match)) {
-                    $blockname = $match[1];
+                if (preg_match('/^(block|macro)\s+([a-z][a-z0-9_]+)$/',
+                        $s, $match)) {
+                    $blockname = $match[2];
                     $stack[] = $blockname;
-                    $blocks[$blockname] = array();
+                    $blocks[$blockname] = array('type' => $match[1]);
                     $cur_block = &$blocks[$blockname];
-                } elseif ($s == 'endblock') {
+                } elseif (preg_match('/^end(block|macro)$/', $s, $match)) {
+                    $cur_type = $cur_block['type'];
+                    if ($cur_type != $match[1])
+                        throw new Exception("Expect end$cur_type but got $s");
+
                     $blockname = array_pop($stack);
+                    unset($cur_block['type']);
                     $code = "\n\tfunction $blockname()\n\t{\n?".">".
                         implode($blocks[$blockname]).
                         "<?php\n\t}\n";
@@ -248,10 +256,12 @@ class Template
                     unset($blocks[$blockname]);
 
                     $cur_block = &$blocks[end($stack)];
-                    $code = "<?php \$this->$blockname() ?".">";
-                    if (end($stack) === '')
-                        $code = $token.$code;
-                    $cur_block[] = $code;
+                    if ($cur_type == 'block') {
+                        $code = "<?php \$this->$blockname() ?".">";
+                        if (end($stack) === '')
+                            $code = $token.$code;
+                        $cur_block[] = $code;
+                    }
                 } elseif ($s == 'raw') {
                     $endraw = '/'.preg_quote(self::STATEMENT_BEGIN, '/').
                         '\s*endraw\s*'.
