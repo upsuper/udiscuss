@@ -206,7 +206,7 @@ class Reply extends Model
 
         global $db;
         $db->beginTransaction();
-        if ($last_update.add($five_minutes) > $now) {
+        if ($last_update->add($five_minutes) > $now) {
             // we can change a history within 5 minutes
             $history = query_one($db,
                 'SELECT history_id FROM history

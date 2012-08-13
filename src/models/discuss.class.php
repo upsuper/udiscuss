@@ -172,6 +172,8 @@ class Discuss extends Model
     public static function get_by_ids($ids)
     {
         $ids = array_unique(array_filter($ids, 'is_int'));
+        if (!$ids)
+            return array();
         $ids = implode(', ', $ids);
 
         global $db;
