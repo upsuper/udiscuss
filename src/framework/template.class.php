@@ -288,8 +288,13 @@ class Template
             } else {
                 $s = trim($m_echo[1][0]);
                 $pos += strlen($m_echo[0][0]);
-                $code = self::translate_filter(self::translate_vars($s));
-                $cur_block[] = "<?php echo ".$code." ?".">";
+                if ($s == '::') {
+                    $blockname = end($stack);
+                    $cur_block[] = "<?php parent::$blockname() ?".">";
+                } else {
+                    $code = self::translate_filter(self::translate_vars($s));
+                    $cur_block[] = "<?php echo ".$code." ?".">";
+                }
             }
         }
 
