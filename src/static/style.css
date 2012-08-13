@@ -1,0 +1,252 @@
+html, body, div, h1, h2, h3, ul, ol, li, a, form, dl, dt, dd, label, input, textarea, p, img, select, option, small {
+    margin: 0; padding: 0; border: 0 none; outline: 0;
+    font-size: 100%;
+}
+ul, ol, li { list-style: none; }
+
+body {
+    font: 14px/22px sans-serif;
+}
+a {
+    text-decoration: none;
+    color: #666;
+}
+a:hover {
+    text-decoration: underline;
+}
+.container {
+    width: 960px;
+    margin: 0 auto;
+}
+.clear::after {
+    clear: both;
+    content: ".";
+    height: 0;
+    display: block;
+    visibility: hidden;
+}
+.center {
+    text-align: center;
+}
+.avatar {
+    border-radius: 15%;
+    background-color: #fff;
+}
+#header {
+    background-color: #eee;
+    border-bottom: 1px solid #ccc;
+}
+#header h1 {
+    font: bold 20px/32px 'Rammetto One', sans-serif;
+    text-transform: uppercase;
+    float: left;
+    padding: 8px 0 4px;
+    text-shadow: 1px 1px 2px #999;
+}
+#header h1:hover {
+    padding: 9px 0 3px 1px;
+    text-shadow: none;
+}
+#header a {
+    text-decoration: none;
+}
+#header ul {
+    float: right;
+    margin-right: -5px;
+}
+#header li {
+    float: left;
+    padding: 8px 5px 4px;
+}
+#header li>a {
+    line-height: 32px;
+    color: #999;
+    float: left;
+    text-decoration: none;
+}
+#header li>a:hover {
+    color: #666;
+}
+#header li>a>img {
+    vertical-align: middle;
+    margin: -2px 8px 0 0;
+    width: 20px;
+    height: 20px;
+}
+#header li.name {
+    margin-right: 10px;
+}
+#flash {
+    margin: 10px 0 -13px;
+}
+.flash {
+    border: 1px solid #000;
+    padding: 7px 15px 3px;
+    margin: 5px 0;
+}
+.flash.error, .flash.fail {
+    background-color: #ffc0cb;
+    border-color: #dc143c;
+    color: #8b0000;
+}
+.flash.success {
+    background-color: #98fb98;
+    border-color: #32cd32;
+}
+#main, #sidebar {
+    margin-top: 20px;
+}
+#main {
+    width: 580px;
+    float: left;
+}
+#main>h2 {
+    font: bold 20px/32px sans-serif;
+}
+form dt {
+    line-height: 30px;
+    margin: 10px 0 0;
+}
+input[type=text], input[type=email], input[type=password], select, textarea {
+    border: 1px solid #ccc;
+    padding: 5px;
+    width: 20em;
+}
+select {
+    width: auto;
+    font-size: 80%;
+}
+input.long {
+    width: 30em;
+}
+textarea {
+    width: 560px;
+    height: 180px;
+}
+input[type=submit], .button {
+    padding: 5px 13px;
+    cursor: pointer;
+    background-color: #999;
+    color: #fff;
+}
+.button:hover {
+    background-color: #aaa;
+    text-decoration: none;
+}
+.button:active {
+    background-color: #666;
+}
+input[type=submit] {
+    margin: 20px 0 0 0;
+    background-color: #008000;
+}
+input[type=submit]:hover {
+    background-color: #329b32;
+}
+input[type=submit]:active {
+    background-color: #006000;
+}
+form .error {
+    margin: 0 0 0 10px;
+    color: #f00;
+}
+form a {
+    margin-left: 10px;
+}
+#sidebar {
+    width: 360px;
+    float: right;
+}
+.widget {
+    background-color: #eee;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 10px 10px;
+    margin: 0 0 10px;
+}
+select#permission {
+    margin: 0 0 0 15px;
+}
+.widget li {
+    list-style: disc;
+    margin-left: 15px;
+    line-height: 25px;
+}
+.widget.top {
+    margin-top: 32px;
+}
+.widget.wall li {
+    display: block;
+    float: left;
+    width: 82px;
+    margin: 0 2px;
+    text-align: center;
+}
+.widget.wall li:hover {
+    text-decoration: underline;
+}
+.widget.wall img {
+    width: 48px;
+    height: 48px;
+}
+.widget.wall a {
+    display: block;
+    font: 12px/12px sans-serif;
+}
+.discuss {
+    border-bottom: 1px solid #eee;
+    padding: 8px;
+}
+.discuss img {
+    float: left;
+    width: 48px;
+    height: 48px;
+    margin: -2px 15px 0 0;
+}
+.discuss h2 {
+    font-size: 16px;
+}
+.discuss p {
+    font-size: 12px;
+    color: #999;
+}
+.reply {
+    border-bottom: 1px solid #eee;
+    padding: 0 0 15px;
+    margin: 0 0 20px;
+}
+#initiater {
+    border-bottom: 3px double #eee;
+}
+.reply .avatar {
+    float: left;
+    width: 24px;
+    height: 24px;
+    margin: 0 10px 0 0;
+}
+.reply h3 {
+    font: 16px/26px sans-serif;
+    margin: 10px 0 20px 0;
+}
+.reply small {
+    color: #999;
+    font-size: 12px;
+    margin: 5px 0 0;
+    float: right;
+}
+.reply small>a {
+    color: #999;
+}
+.reply .edit {
+    font-size: 12px;
+    color: #999;
+    margin-left: 15px;
+}
+#footer {
+    border-top: 1px solid #eee;
+    font-size: 12px;
+    color: #999;
+    text-align: right;
+    margin: 30px 0;
+    padding: 10px 0;
+}

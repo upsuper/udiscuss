@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% block title %}History - {{ $.discuss->title }} - {{ :: }}{% endblock %}
+{% block main %}
+    <h2><a href="{{ ROOT_URI }}/discuss/{{ $.discuss->id }}/">{{ $.discuss->title|E }}</a></h2>
+    {%- for ($i = 0; isset($.history[$i]); ++$i) %}
+        {%- $item = $.history[$i] %}
+        {%- $user = $.users[$item->user_id] %}
+    <div class="reply">
+        <small>time: <time datetime="{{ $item->time->format('c') }}"></time></small>
+        <a href="{{ ROOT_URI }}/user/{{ $user->id }}/">
+            <img class="avatar" src="{{ $user->email|get_gravatar:140|E }}">
+        </a>
+        <h3><a href="{{ ROOT_URI }}/user/{{ $user->id }}/">{{ $user->username|E }}</a></h3>
+        <p>{{ $item->content|E|nl2br }}</p>
+    </div>
+    {%- endfor %}
+    {%- $->update_time() %}
+{%- endblock %}

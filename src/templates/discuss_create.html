@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block title %}Create Discuss - {{ :: }}{% endblock %}
+{% block main %}
+    <h2>Create New Discuss</h2>
+    <form method="POST">
+        <dl>
+            <dt><label for="title">Title</label></dt>
+            <dd><input id="title" name="title" type="text" class="long"></dd>
+            <dt><label for="permission">Default Permission</label>
+            <select id="permission" name="permission">
+                <option value="{{ Discuss::convert_permission('none', true) }}">None
+                <option value="{{ Discuss::convert_permission('read', true) }}">Read
+                <option value="{{ Discuss::convert_permission('reply', true) }}">Reply
+                <option value="{{ Discuss::convert_permission('invite', true) }}">Invite
+            </select></dt>
+            <dt><label for="content">Content</label></dt>
+            <dd><textarea id="content" name="content"></textarea></dd>
+        </dl>
+        {%- $->form_token() %}
+        <p><input type="submit" value="Post"></p>
+    </form>
+{%- endblock %}

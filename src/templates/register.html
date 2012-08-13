@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% block title %}Register - {% parent::title() %}{% endblock %}
+{% block main %}
+    <h2>Register</h2>
+    <form method="POST" id="register">
+        <dl>
+            <dt><label for="username">Username</label></dt>
+            <dd><input id="username" name="username" type="text"></dd>
+            <dt><label for="email">Email</label></dt>
+            <dd><input id="email" name="email" type="email"></dd>
+            <dt><label for="password">Password</label></dt>
+            <dd><input id="password" name="password" type="password"></dd>
+            <dt><label for="confirm">Confirm Password</label></dt>
+            <dd><input id="confirm" type="password"></dd>
+        </dl>
+        {%- $->form_token() %}
+        <p><input type="submit" value="Register"><span class="error"></span></p>
+    </form>
+    <script type="text/javascript">
+        $('#register').on('submit', function (evt) {
+            var error = false;
+            if (!$('#username').value) {
+                $('#username').focus();
+                error = 'Please input username';
+            } else if (!$('#email').value) {
+                $('#email').focus();
+                error = 'Please input email';
+            } else if (!$('#password').value) {
+                $('#password').focus();
+                error = 'Please input password';
+            } else if ($('#password').value != $('#confirm').value) {
+                $('#password').focus();
+                error = 'Password doesn\'t match';
+            }
+            if (error) {
+                $('.error', this).innerHTML = error;
+                evt.preventDefault();
+            }
+        });
+    </script>
+{%- endblock %}

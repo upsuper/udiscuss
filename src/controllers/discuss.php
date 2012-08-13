@@ -14,11 +14,21 @@ class Discuss_Controller extends Controller
             return $discuss->initiater;
         }, $discusses);
         $users = User::get_by_ids($users);
-
-        return template('discuss_list.html', array(
+        $data = array(
             'discusses' => $discusses,
             'users' => $users
-        ));
+        );
+
+        if ($user_id) {
+            $replies = Reply::get_reply_by_user($user_id, 20);
+            $reply_discusses = Discuss::get_by_ids(array_map(function ($reply) {
+                return $reply->discuss_id;
+            }, $replies));
+            $data['replies'] = $replies;
+            $data['reply_discusses'] = $reply_discusses;
+        }
+
+        return template('discuss_list.html', $data);
     }
 
     public function create()
@@ -67,7 +77,7 @@ class Discuss_Controller extends Controller
      * @param Discuss $discuss
      * @return int Discuss::PERMISSION_*
      */
-    private function get_permission($discuss, $permission)
+    private function get_permission($discuss)
     {
         $discuss_perm = $discuss->permission;
         if (!isset($_SESSION['user'])) {
@@ -75,9 +85,9 @@ class Discuss_Controller extends Controller
                 return Discuss::PERMISSION_READ;
         } else {
             $user = $_SESSION['user'];
-            if ($user->id == $initiater)
-                return true;
-            $perm = $user->get_user_permission($discuss->id);
+            if ($user->id == $discuss->initiater)
+                return Discuss::PERMISSION_INVITE;
+            $perm = $discuss->get_user_permission($discuss->id);
             if ($perm !== false)
                 return $perm;
         }
@@ -86,9 +96,9 @@ class Discuss_Controller extends Controller
 
     private function view($id)
     {
-        $user = $_SESSION['user'];
         $discuss = new Discuss($id);
-        if ($this->get_permission($discuss) < Discuss::PERMISSION_READ)
+        $permission = $this->get_permission($discuss);
+        if ($permission < Discuss::PERMISSION_READ)
             return forbidden();
 
         $replies = Reply::get_reply_by_discuss($id, 0);
@@ -99,7 +109,8 @@ class Discuss_Controller extends Controller
         return template('discuss_view.html', array(
             'discuss' => $discuss,
             'replies' => $replies,
-            'users' => $users
+            'users' => $users,
+            'permission' => $permission
         ));
     }
 
@@ -113,20 +124,21 @@ class Discuss_Controller extends Controller
         $page = isset($_GET['page']) ? intval($_GET['page']) : 1;
         $offset = $limit * ($page - 1);
 
+        $user_id = intval($user_id);
         $history = History::get_history($id, $user_id, $limit, $offset);
         if ($user_id == 0) {
             $users = User::get_by_ids(array_map(function ($item) {
                 return $item->user_id;
             }, $history));
-            return template('discuss_history.html', array(
-                'history' => $history,
-                'users' => $users
-            ));
         } else {
-            return template('reply_history.html', array(
-                'history' => $history
-            ));
+            $users = array();
+            $users[$user_id] = new User($user_id);
         }
+        return template('discuss_history.html', array(
+            'history' => $history,
+            'users' => $users,
+            'discuss' => $discuss
+        ));
     }
 
     private function permission($id)
@@ -197,7 +209,8 @@ class Discuss_Controller extends Controller
 
         if (!is_post()) {
             return template('reply_edit.html', array(
-                'content' => $content
+                'content' => $content,
+                'discuss' => $discuss
             ));
         }
 

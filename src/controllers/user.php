@@ -67,7 +67,7 @@ class User_Controller extends Controller
         $replies = Reply::get_reply_by_user($id, $limit, $offset);
         $discusses = Discuss::get_by_ids(array_map(function ($reply) {
             return $reply->discuss_id;
-        }, $replies);
+        }, $replies));
 
         return template('user_reply.html', array(
             'replies' => $replies,
@@ -84,7 +84,7 @@ class User_Controller extends Controller
         $history = History::get_history(0, $id, $limit, $offset);
         $discusses = Discuss::get_by_ids(array_map(function ($item) {
             return $item->discuss_id;
-        }, $history);
+        }, $history));
     }
 }
 

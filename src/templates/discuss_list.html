@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block title %}Discuss - {{ :: }}{% endblock %}
+{% block main %}
+    <ul>
+        {%- for ($i = 0; isset($.discusses[$i]); ++$i) %}
+        {%- $discuss = $.discusses[$i] %}
+        {%- $user = $.users[$discuss->initiater] %}
+        <li class="discuss">
+            <a href="{{ ROOT_URI }}/discuss/{{ $discuss->id }}/"><img class="avatar" src="{{ $user->email|get_gravatar:140|E }}"></a>
+            <h2><a href="{{ ROOT_URI }}/discuss/{{ $discuss->id }}/">{{ $discuss->title|E }}</a></h2>
+            <p>
+                by <a href="{{ ROOT_URI }}/user/{{ $user->id }}/">{{ $user->username|E }}</a>,
+                last update: <time datetime="{{ $discuss->last_update->format('c') }}"></time>
+            </p>
+        </li>
+        {%- endfor %}
+    </ul>
+    {%- $->update_time() %}
+{%- endblock %}
+{% block sidebar %}
+    {%- if (isset($_SESSION.user)) %}
+    <div class="widget center">
+        <a href="{{ ROOT_URI }}/discuss/create/" class="button">Create New Discuss</a>
+    </div>
+    <div class="widget">
+        <h2>Participated</h2>
+        <ul>
+            {%- for ($i = 0; isset($.replies[$i]); ++$i) %}
+            {%- $discuss = $.reply_discusses[$.replies[$i]->discuss_id] %}
+            <li><a href="{{ ROOT_URI }}/discuss/{{ $discuss->id }}/">{{ $discuss->title|E }}</a></li>
+            {%- endfor %}
+        </ul>
+    </div>
+    {%- endif %}
+{%- endblock %}

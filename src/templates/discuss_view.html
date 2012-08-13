@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+{% block title %}{{ $.discuss->title|E }} - {{ :: }}{% endblock %}
+{% block main %}
+    <h2>{{ $.discuss->title|E }}</h2>
+    <div id="initiater" class="reply">
+        {%- $user = $.users[$.discuss->initiater] %}
+        {%- for ($i = 0; isset($.replies[$i]); ++$i) %}
+            {%- if ($.replies[$i]->user_id == $user->id) %}
+                {%- $reply = $.replies[$i] %}
+                {%- break %}
+            {%- endif %}
+        {%- endfor %}
+        <a name="reply_{{ $user->id }}"></a>
+        <small>last update: <a href="{{ ROOT_URI }}/discuss/{{ $.discuss->id }}/history/{{ $user->id }}/"><time datetime="{{ $reply->last_update->format('c') }}"></time></a></small>
+        <a href="{{ ROOT_URI }}/user/{{ $user->id }}/">
+            <img class="avatar" src="{{ $user->email|get_gravatar:140|E }}">
+        </a>
+        <h3><a href="{{ ROOT_URI }}/user/{{ $user->id }}/">{{ $user->username|E }}</a></h3>
+        <p>
+            {{ $reply->content|E|nl2br }}
+            {%- if (isset($_SESSION.user) && $_SESSION.user->id == $user->id) %}
+            <a href="{{ ROOT_URI }}/discuss/{{ $.discuss->id }}/edit/" class="edit">Edit</a>
+            {%- endif %}
+        </p>
+    </div>
+
+    {%- for ($i = 0; isset($.replies[$i]); ++$i) %}
+        {%- $reply = $.replies[$i] %}
+        {%- $user = $.users[$reply->user_id] %}
+        {%- if ($user->id == $.discuss->initiater) %}
+            {%- continue %}
+        {%- endif %}
+    <div class="reply">
+        <a name="reply_{{ $user->id }}"></a>
+        <small>last update: <a href="{{ ROOT_URI }}/discuss/{{ $.discuss->id }}/history/{{ $user->id }}/"><time datetime="{{ $reply->last_update->format('c') }}"></time></a></small>
+        <a href="{{ ROOT_URI }}/user/{{ $user->id }}/">
+            <img class="avatar" src="{{ $user->email|get_gravatar:140|E }}">
+        </a>
+        <h3><a href="{{ ROOT_URI }}/user/{{ $user->id }}/">{{ $user->username|E }}</a></h3>
+        <p>
+            {{ $reply->content|E|nl2br }}
+            {%- if ($.permission >= Discuss::PERMISSION_REPLY && $_SESSION.user->id == $user->id) %}
+            <a href="{{ ROOT_URI }}/discuss/{{ $.discuss->id }}/edit/" class="edit">Edit</a>
+            {%- endif %}
+        </p>
+    </div>
+    {%- endfor %}
+    {%- $->update_time() %}
+    {%- if ($.permission >= Discuss::PERMISSION_REPLY && !isset($.users[$_SESSION.user->id])) %}
+    {%- $user = $_SESSION.user %}
+    <div class="reply">
+        <a name="reply_{{ $user->id }}"></a>
+        <a href="{{ ROOT_URI }}/user/{{ $user->id }}/">
+            <img class="avatar" src="{{ $user->email|get_gravatar:140|E }}">
+        </a>
+        <h3><a href="{{ ROOT_URI }}/user/{{ $user->id }}/">{{ $user->username|E }}</a></h3>
+        <form action="{{ ROOT_URI }}/discuss/{{ $.discuss->id }}/edit/" method="POST">
+            <textarea name="content" placeholder="Your reply..."></textarea>
+            {%- $->form_token() %}
+            <p><input type="submit" value="Post"></p>
+        </form>
+    </div>
+    {%- endif %}
+{%- endblock %}
+{% block sidebar %}
+    <ul class="widget top">
+        <li><a href="{{ ROOT_URI }}/discuss/{{ $.discuss->id }}/history/">View history</a></li>
+        {%- if ($.permission >= Discuss::PERMISSION_REPLY) %}
+        <li><a href="{{ ROOT_URI }}/discuss/{{ $.discuss->id }}/edit/">
+            {%- if ($_SESSION.user->id == $.discuss->initiater) -%}
+            Edit discussion
+            {%- elseif (isset($.users[$_SESSION.user->id])) -%}
+            Edit my reply
+            {%- else -%}
+            Add my reply
+            {%- endif -%}
+        </a></li>
+        {%- if ($_SESSION.user->id == $.discuss->initiater) %}
+        <li><a href="{{ ROOT_URI }}/discuss/{{ $.discuss->id }}/permission/">Edit permission</a></li>
+        {%- endif %}
+        {%- endif %}
+    </ul>
+    <ul class="widget wall clear">
+        {%- $user = $.users[$.discuss->initiater] %}
+        <li>
+            <a href="#reply_{{ $user->id }}"><img class="avatar" src="{{ $user->email|get_gravatar:140|E }}"></a>
+            <a href="#reply_{{ $user->id }}">{{ $user->username|E }}</a>
+        </li>
+        {%- for ($i = 0; isset($.replies[$i]); ++$i) %}
+            {%- $reply = $.replies[$i] %}
+            {%- $user = $.users[$reply->user_id] %}
+            {%- if ($user->id == $.discuss->initiater) %}
+                {%- continue %}
+            {%- endif %}
+        <li>
+            <a href="#reply_{{ $user->id }}"><img class="avatar" src="{{ $user->email|get_gravatar:140|E }}"></a>
+            <a href="#reply_{{ $user->id }}">{{ $user->username|E }}</a>
+        </li>
+        {%- endfor %}
+    </ul>
+{%- endblock %}

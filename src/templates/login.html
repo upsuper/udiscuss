@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% block title %}Login - {{ :: }}{% endblock %}
+{% block main %}
+    <h2>Login</h2>
+    <form method="POST">
+        <dl>
+            <dt><label for="username">Username</label></dt>
+            <dd><input id="username" name="username" type="text"></dd>
+            <dt><label for="password">Password</label></dt>
+            <dd><input id="password" name="password" type="password"></dd>
+        </dl>
+        {%- $->form_token() %}
+        <p>
+            <input type="submit" value="Login">
+            <a href="{{ ROOT_URI }}/register/">Register</a>
+        </p>
+    </form>
+{% endblock %}
