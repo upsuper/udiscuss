@@ -73,6 +73,7 @@ class Template
                     return Template::translate_var($match);
                 case '"':
                     // TODO
+                    return $match;
                     break;
                 case "'":
                     return $match;
@@ -119,9 +120,14 @@ class Template
                         $c = array('htmlspecialchars');
                         break;
                     default:
-                        $c = explode(':', $c, 2);
+                        $c = explode(':', $c);
                     }
-                    $p = isset($c[1]) ? ', '.trim($c[1]) : '';
+                    while (isset($c[1]) && isset($c[2]) && $c[1] === '') {
+                        $c = array_merge(array($c[0].'::'.$c[2]),
+                            array_slice($c, 3));
+                    }
+                    $c = array($c[0], implode(':', array_slice($c, 1)));
+                    $p = $c[1] != '' ? ', '.trim($c[1]) : '';
                     $code = trim($c[0]).'('.$code.$p.')';
                 }
                 $last_pos = $i + 1;
