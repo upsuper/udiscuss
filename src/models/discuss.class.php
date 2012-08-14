@@ -366,7 +366,7 @@ class Discuss extends Model
             $this->discuss_id, $user_id);
         if ($result === false)
             return false;
-        return Discuss::convert_permission($result);
+        return Discuss::convert_permission($result->permission, true);
     }
 
     /**
@@ -438,7 +438,7 @@ class Discuss extends Model
         $result = array();
         while (($row = $query->fetch()) !== false) {
             $result[intval($row->user_id)] =
-                self::convert_permission($row->permission);
+                self::convert_permission($row->permission, true);
         }
         return $result;
     }

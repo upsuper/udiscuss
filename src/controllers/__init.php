@@ -25,12 +25,12 @@ class _Controller extends Controller
         if (!is_post())
             return template('register.html');
 
-        $username = get_form('username');
+        $username = trim(get_form('username'));
         if (!$username) {
             flash('Please input username.', 'fail');
             return redirect();
         }
-        $email = get_form('email');
+        $email = trim(get_form('email'));
         $password = get_form('password');
 
         $user = User::create_user($username, $email);
@@ -66,7 +66,7 @@ class _Controller extends Controller
         if (!is_post())
             return template('login.html');
 
-        $username = get_form('username');
+        $username = trim(get_form('username'));
         $password = get_form('password');
 
         $user = User::get_user($username);
