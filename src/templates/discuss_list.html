@@ -2,8 +2,7 @@
 {% block title %}Discuss - {{ :: }}{% endblock %}
 {% block main %}
     <ul>
-        {%- for ($i = 0; isset($.discusses[$i]); ++$i) %}
-        {%- $discuss = $.discusses[$i] %}
+        {%- foreach ($.discusses as $discuss) %}
         {%- $user = $.users[$discuss->initiater] %}
         <li class="discuss">
             <a href="{{ ROOT_URI }}/discuss/{{ $discuss->id }}/"><img class="avatar" src="{{ $user->email|get_gravatar:140|E }}"></a>
@@ -13,7 +12,7 @@
                 last update: <time datetime="{{ $discuss->last_update->format('c') }}"></time>
             </p>
         </li>
-        {%- endfor %}
+        {%- endforeach %}
     </ul>
     {%- $->update_time() %}
 {%- endblock %}
@@ -25,10 +24,10 @@
     <div class="widget">
         <h2>Participated</h2>
         <ul>
-            {%- for ($i = 0; isset($.replies[$i]); ++$i) %}
-            {%- $discuss = $.reply_discusses[$.replies[$i]->discuss_id] %}
+            {%- foreach ($.replies as $reply) %}
+            {%- $discuss = $.reply_discusses[$reply->discuss_id] %}
             <li><a href="{{ ROOT_URI }}/discuss/{{ $discuss->id }}/">{{ $discuss->title|E }}</a></li>
-            {%- endfor %}
+            {%- endforeach %}
         </ul>
     </div>
     {%- endif %}

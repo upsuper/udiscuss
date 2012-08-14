@@ -4,12 +4,11 @@
     <h2>{{ $.discuss->title|E }}</h2>
     <div id="initiater" class="reply">
         {%- $user = $.users[$.discuss->initiater] %}
-        {%- for ($i = 0; isset($.replies[$i]); ++$i) %}
-            {%- if ($.replies[$i]->user_id == $user->id) %}
-                {%- $reply = $.replies[$i] %}
+        {%- foreach ($.replies as $reply) %}
+            {%- if ($reply->user_id == $user->id) %}
                 {%- break %}
             {%- endif %}
-        {%- endfor %}
+        {%- endforeach %}
         <a name="reply_{{ $user->id }}"></a>
         <small>last update: <a href="{{ ROOT_URI }}/discuss/{{ $.discuss->id }}/history/{{ $user->id }}/"><time datetime="{{ $reply->last_update->format('c') }}"></time></a></small>
         <a href="{{ ROOT_URI }}/user/{{ $user->id }}/">
@@ -24,8 +23,7 @@
         </p>
     </div>
 
-    {%- for ($i = 0; isset($.replies[$i]); ++$i) %}
-        {%- $reply = $.replies[$i] %}
+    {%- foreach ($.replies as $reply) %}
         {%- $user = $.users[$reply->user_id] %}
         {%- if ($user->id == $.discuss->initiater) %}
             {%- continue %}
@@ -44,7 +42,7 @@
             {%- endif %}
         </p>
     </div>
-    {%- endfor %}
+    {%- endforeach %}
     {%- $->update_time() %}
     {%- if ($.permission >= Discuss::PERMISSION_REPLY && !isset($.users[$_SESSION.user->id])) %}
     {%- $user = $_SESSION.user %}
@@ -86,8 +84,7 @@
             <a href="#reply_{{ $user->id }}"><img class="avatar" src="{{ $user->email|get_gravatar:140|E }}"></a>
             <a href="#reply_{{ $user->id }}">{{ $user->username|E }}</a>
         </li>
-        {%- for ($i = 0; isset($.replies[$i]); ++$i) %}
-            {%- $reply = $.replies[$i] %}
+        {%- foreach ($.replies as $reply) %}
             {%- $user = $.users[$reply->user_id] %}
             {%- if ($user->id == $.discuss->initiater) %}
                 {%- continue %}
@@ -96,6 +93,6 @@
             <a href="#reply_{{ $user->id }}"><img class="avatar" src="{{ $user->email|get_gravatar:140|E }}"></a>
             <a href="#reply_{{ $user->id }}">{{ $user->username|E }}</a>
         </li>
-        {%- endfor %}
+        {%- endforeach %}
     </ul>
 {%- endblock %}
