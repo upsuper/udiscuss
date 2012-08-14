@@ -1,0 +1,38 @@
+{% extends 'form_base.html' %}
+{% block title %}Permission - {{ $.discuss->title }} - {{ :: }}{% endblock %}
+{% block main %}
+    <h2><a href="{{ ROOT_URI }}/discuss/{{ $.discuss->id }}/">{{ $.discuss->title|E }}</a></h2>
+    <table id="permissions">
+        <thead>
+            <tr>
+                <th class="username">Username</th>
+                <th class="permission">Permission</th>
+                <th class="manage"></th>
+            </tr>
+        </tbody>
+        <tbody>
+            <tr data-id="0">
+                <td>(Default)</td>
+                <td class="permission" data-permission="{{ $.discuss->permission }}"></td>
+                <td><a href="#" class="edit">Edit</a></td>
+            </tr>
+            {%- foreach ($.permissions as $id => $permission) %}
+            <tr data-id="{{ $id }}">
+                <td>{{ $.users[$id]->username|E }}</td>
+                <td class="permission" data-permission="{{ $permission }}"></td>
+                <td><a href="#" class="edit">Edit</a><a href="#" class="remove">Remove</a></td>
+            </tr>
+            {%- endforeach %}
+            <tr class="new">
+                <td><input type="text" id="username"></td>
+                <td class="permission"><select id="permission">
+                    {%- $->permission_options() %}
+                </select></td>
+                <td><a href="#" class="add">Add</a></td>
+            </tr>
+        </tbody>
+    </table>
+    <input type="hidden" id="action_url" value="{{ ROOT_URI }}/discuss/{{ $.discuss->id }}/permission/">
+    {%- $->form_token() %}
+    <script type="text/javascript" src="{{ STATIC_URI }}/permission.js"></script>
+{%- endblock %}

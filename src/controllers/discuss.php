@@ -87,7 +87,7 @@ class Discuss_Controller extends Controller
             $user = $_SESSION['user'];
             if ($user->id == $discuss->initiater)
                 return Discuss::PERMISSION_INVITE;
-            $perm = $discuss->get_user_permission($discuss->id);
+            $perm = $discuss->get_user_permission($user->id);
             if ($perm !== false)
                 return $perm;
         }
@@ -163,17 +163,37 @@ class Discuss_Controller extends Controller
         $action = get_form('action');
         $user_id = intval(get_form('user_id'));
         $result = false;
+        $reason = 'unknown action ' + $action;
         switch ($action) {
+        case 'add':
+            $username = trim(get_form('username'));
+            $add_user = User::get_user($username);
+            if ($add_user === false) {
+                $reason = 'user not found';
+                break;
+            }
+            $user_id = $add_user->id;
         case 'set':
             $permission = intval(get_form('permission'));
-            $result = $discuss->set_user_permission($user_id, $permission);
+            $reason = 'set failed';
+            if ($user_id) {
+                $result = $discuss->set_user_permission($user_id, $permission);
+            } else {
+                $discuss->permission = $permission;
+                $result = $discuss->put_info();
+            }
             break;
         case 'remove':
+            $reason = 'remove failed';
             $result = $discuss->remove_user_permission($user_id);
             break;
         }
 
-        return json(array('result' => $result));
+        return json(array(
+            'result' => $result,
+            'user_id' => $user_id,
+            'reason' => $result ? '' : $reason
+        ));
     }
 
     private function invite($id)

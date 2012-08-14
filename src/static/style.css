@@ -1,4 +1,10 @@
-html, body, div, h1, h2, h3, ul, ol, li, a, form, dl, dt, dd, label, input, textarea, p, img, select, option, small {
+html, body, div,
+h1, h2, h3,
+ul, ol, li,
+dl, dt, dd,
+form, label, input, textarea, select, option,
+a, p, img, small,
+table, thead, tbody, tr, th, td {
     margin: 0; padding: 0; border: 0 none; outline: 0;
     font-size: 100%;
 }
@@ -242,6 +248,22 @@ select#permission {
     color: #999;
     margin-left: 15px;
 }
+#permissions {
+    border-collapse: collapse;
+    border: 1px solid #ccc;
+    margin-top: 20px;
+}
+#permissions td, #permissions th {
+    border-top: 1px solid #ccc;
+    padding: 5px 10px;
+    line-height: 29px;
+}
+th.username { text-align: left; }
+th.permission { width: 8em; }
+td.permission { text-align: center; }
+th.manage { width: 8em; }
+#permissions #permission { margin: 0; }
+#permissions a { margin-right: .5em; }
 #footer {
     border-top: 1px solid #eee;
     font-size: 12px;

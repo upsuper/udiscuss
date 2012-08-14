@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{%- macro form_token %}
+    <input type="hidden" id="token_field" name="{{ $.CONFIG.token_field }}" value="{{ get_token() }}">
+{%- endmacro %}
+{%- macro permission_options %}
+    <option value="{{ 'none'|Discuss::convert_permission:true }}">None
+    <option value="{{ 'read'|Discuss::convert_permission:true }}">Read
+    <option value="{{ 'reply'|Discuss::convert_permission:true }}">Reply
+    <option value="{{ 'invite'|Discuss::convert_permission:true }}">Invite
+{%- endmacro %}
