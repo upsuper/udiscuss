@@ -279,6 +279,9 @@ th.manage { width: 8em; }
 #profile.widget .avatar {
     float: left;
 }
+#main ul {
+    margin: 0 0 20px;
+}
 #footer {
     border-top: 1px solid #eee;
     font-size: 12px;

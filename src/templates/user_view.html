@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% block title %}{{ $.user->username|E }} - {{ :: }}{% endblock %}
+{% block main %}
+    <h2>Initiated Discussions</h2>
+    <ul>
+        {%- foreach ($.discusses as $discuss) %}
+        <li class="discuss">
+            <a href="{{ ROOT_URI }}/discuss/{{ $discuss->id }}/"><img class="avatar" src="{{ $.user->email|get_gravatar:140|E }}"></a>
+            <h2><a href="{{ ROOT_URI }}/discuss/{{ $discuss->id }}/">{{ $discuss->title|E }}</a></h2>
+            <p>
+                by <a href="{{ ROOT_URI }}/user/{{ $.user->id }}/">{{ $.user->username|E }}</a>,
+                last update: <time datetime="{{ $discuss->last_update->format('c') }}"></time>
+            </p>
+        </li>
+        {%- endforeach %}
+    </ul>
+    <h2>Participated Discussions</h2>
+    <ul>
+        {%- foreach ($.replies as $reply) %}
+            {%- $discuss = $.reply_discusses[$reply->discuss_id] %}
+            {%- $user = $.initiaters[$discuss->initiater] %}
+        <li class="discuss">
+            <a href="{{ ROOT_URI }}/discuss/{{ $discuss->id }}/"><img class="avatar" src="{{ $user->email|get_gravatar:140|E }}"></a>
+            <h2><a href="{{ ROOT_URI }}/discuss/{{ $discuss->id }}/">{{ $discuss->title|E }}</a></h2>
+            <p>
+                by <a href="{{ ROOT_URI }}/user/{{ $user->id }}/">{{ $user->username|E }}</a>,
+                last update: <time datetime="{{ $discuss->last_update->format('c') }}"></time>
+            </p>
+        </li>
+        {%- endforeach %}
+    </ul>
+    {%- $->update_time() %}
+{%- endblock %}
+{% block sidebar %}
+    <div class="widget clear" id="profile">
+        <img class="avatar" src="{{ $.user->email|get_gravatar:140|E }}">
+        <dl>
+            <dt>Username</dt>
+            <dd>{{ $.user->username|E }}</dd>
+            <dt>User ID</dt>
+            <dd>{{ $.user->id }}</dd>
+        </dl>
+    </div>
+{%- endblock %}

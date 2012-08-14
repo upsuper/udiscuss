@@ -35,14 +35,16 @@ class User_Controller extends Controller
         $reply_discusses = Discuss::get_by_ids(array_map(function ($reply) {
             return $reply->discuss_id;
         }, $replies));
-        $history = History::get_history(0, $id, 5);
+        $initiaters = User::get_by_ids(array_map(function ($discuss) {
+            return $discuss->initiater;
+        }, $reply_discusses));
 
         return template('user_view.html', array(
             'user' => $user,
             'discusses' => $discusses,
             'replies' => $replies,
             'reply_discusses' => $reply_discusses,
-            'history' => $history
+            'initiaters' => $initiaters
         ));
     }
 
