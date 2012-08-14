@@ -98,15 +98,24 @@ class _Controller extends Controller
 
         $user = $_SESSION['user'];
         if (!is_post()) {
-            return template('settings.html', array(
+            return template('profile.html', array(
                 'username' => $user->username,
                 'email' => $user->email
             ));
         }
 
         try {
-            $user->username = get_form('username');
-            $user->email = get_form('email');
+            $user->username = trim(get_form('username'));
+            $user->email = trim(get_form('email'));
+            $newpassword = get_form('newpassword');
+            if ($newpassword) {
+                $password = get_form('password');
+                if (!$user->check_password($password)) {
+                    flash('Password is wrong.', 'fail');
+                    redirect();
+                }
+                $user->password = $newpassword;
+            }
         } catch (Exception $e) {
             flash('Invalid username or email.', 'fail');
             return redirect();

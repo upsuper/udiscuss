@@ -1,0 +1,45 @@
+{% extends 'form_base.html' %}
+{% block title %}Profile - {{ :: }}{% endblock %}
+{% block main %}
+    <h2>Profile</h2>
+    <form method="POST" id="profile">
+        <dl>
+            <dt><label for="username">Username</label></dt>
+            <dd><input id="username" name="username" type="text" value="{{ $.username|E }}"></dd>
+            <dt><label for="email">Email</label></dt>
+            <dd><input id="email" name="email" type="email" value="{{ $.email|E }}"></dd>
+            <dt><label for="password">Current Password</label></dt>
+            <dd><input id="password" name="password" type="password"></dd>
+            <dt><label for="newpassword">New Password</label></dt>
+            <dd><input id="newpassword" name="newpassword" type="password"></dd>
+            <dt><label for="confirm">Confirm New Password</label></dt>
+            <dd><input id="confirm" type="password"></dd>
+        </dl>
+        {%- $->form_token() %}
+        <p><input type="submit" value="Save"><span class="error"></span></p>
+    </form>
+    <script type="text/javascript">
+        $('#profile').on('submit', function (evt) {
+            var error = false;
+            if (!$('#username').value) {
+                $('#username').focus();
+                error = 'Please input username';
+            } else if (!$('#email').value) {
+                $('#email').focus();
+                error = 'Please input email';
+            } else if ($('#newpassword').value) {
+                if (!$('#password').value) {
+                    $('#password').focus();
+                    error = 'Please input current password first';
+                } else if ($('#newpassword').value != $('#confirm').value) {
+                    $('#newpassword').focus();
+                    error = 'New password doesn\'t match';
+                }
+            }
+            if (error) {
+                $('.error', this).innerHTML = error;
+                evt.preventDefault();
+            }
+        });
+    </script>
+{%- endblock %}

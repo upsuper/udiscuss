@@ -264,6 +264,21 @@ td.permission { text-align: center; }
 th.manage { width: 8em; }
 #permissions #permission { margin: 0; }
 #permissions a { margin-right: .5em; }
+#profile.widget dl {
+    float: left;
+    margin: 10px 20px 0;
+}
+#profile.widget dt {
+    color: #999;
+}
+#profile.widget dd {
+    margin-left: 3.5em;
+    font: bold 16px/30px sans-serif;
+    margin-bottom: 10px;
+}
+#profile.widget .avatar {
+    float: left;
+}
 #footer {
     border-top: 1px solid #eee;
     font-size: 12px;

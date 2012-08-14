@@ -195,7 +195,7 @@ class User extends Model
                 return false;
             $this->dirty = true;
         }
-        $this->username = username;
+        $this->username = $username;
         return true;
     }
 
@@ -224,7 +224,7 @@ class User extends Model
                 return false;
             $this->dirty = true;
         }
-        $this->email = email;
+        $this->email = $email;
         return true;
     }
 
